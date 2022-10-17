@@ -46,5 +46,6 @@ a simple tool to generate POST requests with sample data to /api/sales; can be r
   - [ ] Normalize products and customers out of orders
   - [ ] Add the ability to process multiple orders at a time through the web api
   - [ ] Lock down the api endpoint so random users can't access it
+  - [ ] Fix the docker build
   - [ ] Fix any issues or make any upgrades you think should be done
   - [ ] Anything else you think of adding or changing!
