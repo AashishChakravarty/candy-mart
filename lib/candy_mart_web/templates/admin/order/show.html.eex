@@ -1,0 +1,42 @@
+<section id="torch-toolbar">
+  <div class="torch-container">
+    <%= link "Edit", to: Routes.admin_order_path(@conn, :edit, @order), class: "torch-button" %>
+    <%= link "Back", to: Routes.admin_order_path(@conn, :index), class: "torch-button" %>
+  </div>
+</section>
+
+<section id="torch-header-and-content">
+  <div class="torch-container">
+    <div class="header">
+      <h3>Order Details</h3>
+    </div>
+    <ul>
+      
+        <li>
+          <div class="torch-show-label">Quantity:</div>
+          <div class="torch-show-data"><%= @order.quantity %></div>
+        </li>
+      
+        <li>
+          <div class="torch-show-label">Unit cost:</div>
+          <div class="torch-show-data"><%= @order.unit_cost %></div>
+        </li>
+      
+        <li>
+          <div class="torch-show-label">Total cost:</div>
+          <div class="torch-show-data"><%= @order.total_cost %></div>
+        </li>
+      
+        <li>
+          <div class="torch-show-label">Product name:</div>
+          <div class="torch-show-data"><%= @order.product_name %></div>
+        </li>
+      
+        <li>
+          <div class="torch-show-label">Customer:</div>
+          <div class="torch-show-data"><%= @order.customer_id %></div>
+        </li>
+      
+    </ul>
+  </div>
+</section>
