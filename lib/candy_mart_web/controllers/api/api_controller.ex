@@ -4,7 +4,7 @@ defmodule CandyMartWeb.Api.ApiController do
 
   def create_sales(conn, params) do
     case Orders.create_order(params) do
-      {:ok, order} ->
+      {:ok, _order} ->
         conn
         |> put_status(:ok)
         |> json(%{status: "Order created successfully."})
