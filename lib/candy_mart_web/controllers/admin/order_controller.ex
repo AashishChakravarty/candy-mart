@@ -4,14 +4,13 @@ defmodule CandyMartWeb.Admin.OrderController do
   alias CandyMart.Orders
   alias CandyMart.Orders.Order
 
-  
-#  plug(:put_root_layout, {CandyMartWeb.LayoutView, "torch.html"})
-  
+  #  plug(:put_root_layout, {CandyMartWeb.LayoutView, "torch.html"})
 
   def index(conn, params) do
     case Orders.paginate_orders(params) do
       {:ok, assigns} ->
         render(conn, "index.html", assigns)
+
       error ->
         conn
         |> put_flash(:error, "There was an error rendering Orders. #{inspect(error)}")
@@ -24,12 +23,29 @@ defmodule CandyMartWeb.Admin.OrderController do
     render(conn, "new.html", changeset: changeset)
   end
 
+  def create(conn, %{"orders" => orders_params}) do
+    case Orders.import_csv(orders_params["bulk_orders"].path) do
+      :ok ->
+        conn
+        |> put_flash(:info, "Bulk Orders created successfully.")
+        |> redirect(to: Routes.admin_order_path(conn, :index))
+
+      _ ->
+        changeset = Orders.change_order(%Order{})
+
+        conn
+        |> put_flash(:error, "Please Attach Valid File")
+        |> render("new.html", changeset: changeset)
+    end
+  end
+
   def create(conn, %{"order" => order_params}) do
     case Orders.create_order(order_params) do
       {:ok, order} ->
         conn
         |> put_flash(:info, "Order created successfully.")
         |> redirect(to: Routes.admin_order_path(conn, :show, order))
+
       {:error, %Ecto.Changeset{} = changeset} ->
         render(conn, "new.html", changeset: changeset)
     end
@@ -54,6 +70,7 @@ defmodule CandyMartWeb.Admin.OrderController do
         conn
         |> put_flash(:info, "Order updated successfully.")
         |> redirect(to: Routes.admin_order_path(conn, :show, order))
+
       {:error, %Ecto.Changeset{} = changeset} ->
         render(conn, "edit.html", order: order, changeset: changeset)
     end

@@ -35,17 +35,16 @@ defmodule CandyMart.Orders do
     with {:ok, filter} <- Filtrex.parse_params(filter_config(:orders), params["order"] || %{}),
          %Scrivener.Page{} = page <- do_paginate_orders(filter, params) do
       {:ok,
-        %{
-          orders: page.entries,
-          page_number: page.page_number,
-          page_size: page.page_size,
-          total_pages: page.total_pages,
-          total_entries: page.total_entries,
-          distance: @pagination_distance,
-          sort_field: sort_field,
-          sort_direction: sort_direction
-        }
-      }
+       %{
+         orders: page.entries,
+         page_number: page.page_number,
+         page_size: page.page_size,
+         total_pages: page.total_pages,
+         total_entries: page.total_entries,
+         distance: @pagination_distance,
+         sort_field: sort_field,
+         sort_direction: sort_direction
+       }}
     else
       {:error, error} -> {:error, error}
       error -> {:error, error}
@@ -155,9 +154,56 @@ defmodule CandyMart.Orders do
 
   defp filter_config(:orders) do
     defconfig do
-      
     end
   end
 
+  def parse_csv(file_path) do
+    file_path
+    |> File.stream!()
+    |> Stream.map(&String.trim(&1))
+    |> Stream.map(&String.split(&1, ","))
+    |> Enum.to_list()
+  end
 
+  def import_csv(file_path) do
+    [_header | rows] =
+      file_path
+      |> parse_csv()
+
+    rows
+    |> Stream.map(&order_changeset(&1))
+    |> Stream.map(&create_multi_transaction/1)
+    |> Task.async_stream(&Repo.transaction(&1), max_concurrency: 50, ordered: false)
+    |> Enum.reduce_while(:ok, fn
+      {:ok, {:ok, _result}}, _acc ->
+        {:cont, :ok}
+
+      _, _acc ->
+        {:halt, :error}
+    end)
+  end
+
+  def order_changeset(row) do
+    header = [
+      "product_name",
+      "unit_cost",
+      "total_cost",
+      "quantity",
+      "purchased_at",
+      "customer_id"
+    ]
+
+    attrs =
+      header
+      |> Stream.zip(row)
+      |> Map.new()
+
+    %Order{}
+    |> Order.changeset(attrs)
+  end
+
+  def create_multi_transaction(changeset) do
+    Ecto.Multi.new()
+    |> Ecto.Multi.insert(:orders, changeset)
+  end
 end

@@ -9,6 +9,28 @@
     <div class="header">
       <h3>New Order</h3>
     </div>
-    <%= render "form.html", Map.put(assigns, :action, Routes.admin_order_path(@conn, :create)) %>
+    <div class="d-flex">
+      <div class="flex-child">
+        <%= render "form.html", Map.put(assigns, :action, Routes.admin_order_path(@conn, :create)) %>
+      </div>
+      <div class="flex-child">
+        <%= form_for @conn, Routes.admin_order_path(@conn, :create), [as: :orders, multipart: true, id: "torch-form"], fn f -> %>
+          <fieldset class="torch-panel">
+            <legend>
+              <span>Import Orders</span>
+            </legend>
+
+            <div class="torch-form-group">
+              <label>Order File</label>
+              <%= file_input f, :bulk_orders, required: true %>
+            </div>
+
+            <div class="torch-submit-form">
+              <%= submit "Submit", class: "torch-submit-button" %>
+            </div>
+          </fieldset>
+        <% end %>
+      </div>
+    </div>
   </div>
 </section>

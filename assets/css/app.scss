@@ -1,5 +1,5 @@
 /* This file is for your main application css. */
-@import "./phoenix.css";
+// @import './phoenix.css';
 
 /* Alerts and form errors */
 .alert {
@@ -33,4 +33,11 @@
   color: #a94442;
   display: block;
   margin: -1rem 0 2rem;
+}
+
+.d-flex {
+  display: flex;
+}
+.flex-child {
+  flex: 1;
 }
