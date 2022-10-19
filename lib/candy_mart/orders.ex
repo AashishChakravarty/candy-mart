@@ -157,6 +157,14 @@ defmodule CandyMart.Orders do
     end
   end
 
+  def add_order(data) do
+    data
+    |> Map.put("product_name", data["product"])
+    |> Map.put("unit_cost", round(data["unit_cost"]))
+    |> Map.put("total_cost", round(data["total_cost"]))
+    |> create_order()
+  end
+
   def parse_csv(file_path) do
     file_path
     |> File.stream!()

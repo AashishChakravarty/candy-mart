@@ -2,8 +2,8 @@ defmodule CandyMartWeb.Api.ApiController do
   use CandyMartWeb, :controller
   alias CandyMart.Orders
 
-  def create_sales(conn, params) do
-    case Orders.create_order(params) do
+  def create_sale(conn, params) do
+    case Orders.add_order(params) do
       {:ok, _order} ->
         conn
         |> put_status(:ok)

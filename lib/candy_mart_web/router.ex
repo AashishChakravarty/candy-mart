@@ -44,7 +44,7 @@ defmodule CandyMartWeb.Router do
   scope "/api", CandyMartWeb.Api, as: :api do
     pipe_through :api
 
-    post "/sales", ApiController, :create_sales
+    post "/sales", ApiController, :create_sale
   end
 
   # Other scopes may use custom stacks.
