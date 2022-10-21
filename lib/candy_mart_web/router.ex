@@ -1,6 +1,6 @@
 defmodule CandyMartWeb.Router do
   use CandyMartWeb, :router
-	use Pow.Phoenix.Router
+  use Pow.Phoenix.Router
 
   pipeline :browser do
     plug :accepts, ["html"]
@@ -35,17 +35,17 @@ defmodule CandyMartWeb.Router do
     get "/", PageController, :index
   end
 
-	scope "/admin", CandyMartWeb.Admin, as: :admin do
-		pipe_through [:browser, :protected, :admin_layout]
+  scope "/admin", CandyMartWeb.Admin, as: :admin do
+    pipe_through [:browser, :protected, :admin_layout]
 
-		get "/orders/statistics", OrderController, :statistics
-		resources "/orders", OrderController
-
-	end
+    get "/orders/statistics", OrderController, :statistics
+    resources "/orders", OrderController
+  end
 
   scope "/api", CandyMartWeb.Api, as: :api do
     pipe_through :api
 
+    post "/login", ApiController, :user_login
     post "/sales", ApiController, :create_sale
   end
 

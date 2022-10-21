@@ -7,4 +7,7 @@ defmodule CandyMart.Users.User do
 
     timestamps()
   end
+
+  def authenticate(%{password_hash: password_hash}, password),
+    do: Pow.Ecto.Schema.Password.pbkdf2_verify(password, password_hash)
 end
