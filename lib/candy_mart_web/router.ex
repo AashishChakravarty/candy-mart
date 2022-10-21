@@ -38,7 +38,9 @@ defmodule CandyMartWeb.Router do
 	scope "/admin", CandyMartWeb.Admin, as: :admin do
 		pipe_through [:browser, :protected, :admin_layout]
 
+		get "/orders/statistics", OrderController, :statistics
 		resources "/orders", OrderController
+
 	end
 
   scope "/api", CandyMartWeb.Api, as: :api do

@@ -33,6 +33,7 @@
 
     <%= Torch.FlashView.render("_flash_messages.html", assigns) %>
     <%= @inner_content %>
+    <script src="<%= Routes.static_path(@conn, "/js/app.js") %>"></script>
     <script src="<%= Routes.static_path(@conn, "/torch/torch.js") %>"></script>
   </body>
 </html>

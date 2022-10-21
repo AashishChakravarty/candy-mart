@@ -1,7 +1,7 @@
 // We need to import the CSS so that webpack will load it.
 // The MiniCssExtractPlugin is used to separate it out into
 // its own CSS file.
-import "../css/app.scss"
+import '../css/app.scss';
 
 // webpack automatically bundles all modules in your
 // entry points. Those entry points can be configured
@@ -12,4 +12,31 @@ import "../css/app.scss"
 //     import {Socket} from "phoenix"
 //     import socket from "./socket"
 //
-import "phoenix_html"
+import 'phoenix_html';
+import * as echarts from 'echarts';
+
+var barChartDom = document.getElementById('barChart');
+var barChart = echarts.init(barChartDom, { renderer: 'canvas' });
+
+barChart.resize({
+  height: 500,
+});
+
+var option = {
+  xAxis: {
+    type: 'category',
+    data: orders.labels,
+    name: orders.title,
+  },
+  yAxis: {
+    type: 'value',
+  },
+  series: [
+    {
+      data: orders.data,
+      type: 'bar',
+    },
+  ],
+};
+
+barChart.setOption(option);

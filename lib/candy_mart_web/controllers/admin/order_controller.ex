@@ -84,4 +84,14 @@ defmodule CandyMartWeb.Admin.OrderController do
     |> put_flash(:info, "Order deleted successfully.")
     |> redirect(to: Routes.admin_order_path(conn, :index))
   end
+
+  def statistics(conn, %{"type" => type}) do
+    orders = Orders.get_order_statistics(type)
+    render(conn, "statistics.html", orders: orders)
+  end
+
+  def statistics(conn, params) do
+    orders = Orders.get_order_statistics()
+    render(conn, "statistics.html", orders: orders)
+  end
 end

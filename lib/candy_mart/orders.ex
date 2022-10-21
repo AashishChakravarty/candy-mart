@@ -214,4 +214,47 @@ defmodule CandyMart.Orders do
     Ecto.Multi.new()
     |> Ecto.Multi.insert(:orders, changeset)
   end
+
+  def get_order_statistics(range \\ "month") do
+    get_orders(range) |> get_orders_data(range)
+  end
+
+  def get_orders("month") do
+    from(order in Order,
+      group_by: [fragment("date_part('month', ?)", order.inserted_at), fragment("month")],
+      select: %{
+        count: count(order.id),
+        date: fragment("to_char(?, 'Month') as month", order.inserted_at)
+      },
+      order_by: fragment("date_part('month', ?)", order.inserted_at)
+    )
+    |> Repo.all()
+  end
+
+  def get_orders("year") do
+    from(order in Order,
+      group_by: [fragment("date_part('year', ?)", order.inserted_at)],
+      select: %{
+        count: count(order.id),
+        date: fragment("date_part('year', ?)::int", order.inserted_at)
+      },
+      order_by: fragment("date_part('year', ?)", order.inserted_at)
+    )
+    |> Repo.all()
+  end
+
+  def get_orders(_), do: []
+
+  def get_orders_data([], _), do: %{data: [], labels: [], title: ""}
+
+  def get_orders_data(orders, range) do
+    {data, years} =
+      orders
+      |> Enum.reduce({[], []}, fn order, {acc_data, acc_label} ->
+        label = order.date |> to_string() |> String.trim()
+        {acc_data ++ [order.count], acc_label ++ [label]}
+      end)
+
+    %{data: data, labels: years, title: String.capitalize(range)}
+  end
 end
