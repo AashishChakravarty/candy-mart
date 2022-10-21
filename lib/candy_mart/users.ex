@@ -11,6 +11,7 @@ defmodule CandyMart.Users do
 
   @hash_algorithm :sha256
   @rand_size 32
+  @api_validity_in_days 60
 
   @doc """
   Returns the list of users.
@@ -106,18 +107,14 @@ defmodule CandyMart.Users do
     User.changeset(user, attrs)
   end
 
-  @doc """
-  Gets a user by email and password.
-
-  ## Examples
-
-      iex> get_user_by_email_and_password("foo@example.com", "correct_password")
-      %User{}
-
-      iex> get_user_by_email_and_password("foo@example.com", "invalid_password")
-      nil
-
-  """
+  def get_user_by_api_token(token) do
+    with {:ok, query} <- verify_api_token_query(token),
+         %User{} = user <- Repo.one(query) do
+      {:ok, user}
+    else
+      _ -> {:error, nil}
+    end
+  end
 
   def authenticate(email, password) do
     with %User{} = user <- Repo.get_by(User, email: email),
@@ -156,6 +153,27 @@ defmodule CandyMart.Users do
        context: "api_token",
        user_id: user.id
      }}
+  end
+
+  def verify_api_token_query(token) do
+    case Base.url_decode64(token, padding: false) do
+      {:ok, decoded_token} ->
+        hashed_token = :crypto.hash(@hash_algorithm, decoded_token)
+
+        query =
+          from(user_token in UserToken,
+            join: user in assoc(user_token, :user),
+            where:
+              user_token.inserted_at > ago(@api_validity_in_days, "day") and
+                user_token.token == ^hashed_token and user_token.context == ^"api_token",
+            select: user
+          )
+
+        {:ok, query}
+
+      _ ->
+        {:error, nil}
+    end
   end
 
   @doc """

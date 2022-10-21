@@ -1,6 +1,7 @@
 endpoint = "127.0.0.1:4000/api/sales"
 http_headers = [
-  "Content-Type": "application/json"
+  "Content-Type": "application/json",
+  "authorization": "Bearer mzQs6fk-I4m744T_Ll-vNeGJVIpjcPwqk3_L3AubZG4"
 ]
 
 base_cost = 25

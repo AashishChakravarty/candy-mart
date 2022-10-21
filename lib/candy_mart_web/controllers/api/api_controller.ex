@@ -8,12 +8,12 @@ defmodule CandyMartWeb.Api.ApiController do
       {:ok, _order} ->
         conn
         |> put_status(:ok)
-        |> json(%{status: "Order created successfully."})
+        |> json(%{status: true, message: "Order created successfully."})
 
       {:error, _} ->
         conn
         |> put_status(:ok)
-        |> json(%{status: "Something went wrong"})
+        |> json(%{status: false, message: "Something went wrong"})
     end
   end
 

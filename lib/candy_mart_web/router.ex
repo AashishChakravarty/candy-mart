@@ -23,6 +23,10 @@ defmodule CandyMartWeb.Router do
     plug :accepts, ["json"]
   end
 
+  pipeline :api_auth do
+    plug(CandyMartWeb.Plugs.APIAuthorization)
+  end
+
   scope "/" do
     pipe_through :browser
 
@@ -46,6 +50,8 @@ defmodule CandyMartWeb.Router do
     pipe_through :api
 
     post "/login", ApiController, :user_login
+
+    pipe_through :api_auth
     post "/sales", ApiController, :create_sale
   end
 
