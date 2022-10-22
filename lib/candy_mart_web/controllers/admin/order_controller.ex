@@ -90,7 +90,7 @@ defmodule CandyMartWeb.Admin.OrderController do
     render(conn, "statistics.html", orders: orders)
   end
 
-  def statistics(conn, params) do
+  def statistics(conn, _params) do
     orders = Orders.get_order_statistics()
     render(conn, "statistics.html", orders: orders)
   end
