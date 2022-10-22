@@ -157,6 +157,18 @@ defmodule CandyMart.Orders do
     end
   end
 
+  def add_order(%{"_json" => data}) when is_list(data) do
+    data
+    |> Enum.map(&add_order/1)
+    |> Enum.reduce_while({:ok, []}, fn
+      {:ok, result}, {_status, acc} ->
+        {:cont, {:ok, acc ++ [result]}}
+
+      _, {_status, acc} ->
+        {:halt, {:error, acc}}
+    end)
+  end
+
   def add_order(data) do
     data
     |> Map.put("product_name", data["product"])
