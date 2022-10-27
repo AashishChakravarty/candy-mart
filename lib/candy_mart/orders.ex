@@ -9,9 +9,11 @@ defmodule CandyMart.Orders do
   import Filtrex.Type.Config
 
   alias CandyMart.Orders.Order
+  alias CandyMart.Orders.Customer
 
   @pagination [page_size: 15]
   @pagination_distance 5
+  @chars "ABCDEFGHIJKLMNOPQRSTUVWXYZ" |> String.split("")
 
   @doc """
   Paginate the list of orders using filtrex
@@ -34,9 +36,18 @@ defmodule CandyMart.Orders do
 
     with {:ok, filter} <- Filtrex.parse_params(filter_config(:orders), params["order"] || %{}),
          %Scrivener.Page{} = page <- do_paginate_orders(filter, params) do
+      entries =
+        page.entries
+        |> Enum.map(fn order ->
+          customer = get_customer(order.customer_id)
+          order |> Map.put(:customer_name, customer.name)
+        end)
+
+      IO.inspect(entries)
+
       {:ok,
        %{
-         orders: page.entries,
+         orders: entries,
          page_number: page.page_number,
          page_size: page.page_size,
          total_pages: page.total_pages,
@@ -56,6 +67,14 @@ defmodule CandyMart.Orders do
     |> Filtrex.query(filter)
     |> order_by(^sort(params))
     |> paginate(Repo, params, @pagination)
+  end
+
+  def get_orders_query() do
+    from(order in Order,
+      join: customer in Customer,
+      on: customer.id == order.customer_id
+      # select: %{order | customer: customer}
+    )
   end
 
   @doc """
@@ -155,6 +174,31 @@ defmodule CandyMart.Orders do
   defp filter_config(:orders) do
     defconfig do
     end
+  end
+
+  def generate_string(length \\ 5) do
+    Enum.reduce(1..length, [], fn _i, acc ->
+      [Enum.random(@chars) | acc]
+    end)
+    |> Enum.join("")
+  end
+
+  def create_customer_order(params) do
+    Ecto.Multi.new()
+    |> Ecto.Multi.run(:customer, fn _repo, _ ->
+      customer_id = params["customer_id"]
+
+      with %Customer{} = customer <- get_customer(customer_id) do
+        {:ok, customer}
+      else
+        _ ->
+          create_customer(%{name: generate_string()})
+      end
+    end)
+    |> Ecto.Multi.run(:order, fn _repo, %{customer: _customer} ->
+      create_order(params)
+    end)
+    |> Repo.transaction()
   end
 
   def add_order(%{"_json" => data}) when is_list(data) do
@@ -268,5 +312,101 @@ defmodule CandyMart.Orders do
       end)
 
     %{data: data, labels: years, title: String.capitalize(range)}
+  end
+
+  @doc """
+  Returns the list of customers.
+
+  ## Examples
+
+      iex> list_customers()
+      [%Customer{}, ...]
+
+  """
+  def list_customers do
+    Repo.all(Customer)
+  end
+
+  @doc """
+  Gets a single customer.
+
+  Raises `Ecto.NoResultsError` if the Customer does not exist.
+
+  ## Examples
+
+      iex> get_customer!(123)
+      %Customer{}
+
+      iex> get_customer!(456)
+      ** (Ecto.NoResultsError)
+
+  """
+  def get_customer!(id), do: Repo.get!(Customer, id)
+
+  def get_customer(id), do: Repo.get(Customer, id)
+
+  @doc """
+  Creates a customer.
+
+  ## Examples
+
+      iex> create_customer(%{field: value})
+      {:ok, %Customer{}}
+
+      iex> create_customer(%{field: bad_value})
+      {:error, %Ecto.Changeset{}}
+
+  """
+  def create_customer(attrs \\ %{}) do
+    %Customer{}
+    |> Customer.changeset(attrs)
+    |> Repo.insert()
+  end
+
+  @doc """
+  Updates a customer.
+
+  ## Examples
+
+      iex> update_customer(customer, %{field: new_value})
+      {:ok, %Customer{}}
+
+      iex> update_customer(customer, %{field: bad_value})
+      {:error, %Ecto.Changeset{}}
+
+  """
+  def update_customer(%Customer{} = customer, attrs) do
+    customer
+    |> Customer.changeset(attrs)
+    |> Repo.update()
+  end
+
+  @doc """
+  Deletes a customer.
+
+  ## Examples
+
+      iex> delete_customer(customer)
+      {:ok, %Customer{}}
+
+      iex> delete_customer(customer)
+      {:error, %Ecto.Changeset{}}
+
+  """
+  def delete_customer(%Customer{} = customer) do
+    Repo.delete(customer)
+  end
+
+  @doc """
+  Returns an `%Ecto.Changeset{}` for tracking customer changes.
+
+  ## Examples
+
+      iex> change_customer(customer)
+      %Ecto.Changeset{data: %Customer{}}
+
+  """
+  def change_customer(%Customer{} = customer, attrs \\ %{}) do
+    Customer.changeset(customer, attrs)
   end
 end

@@ -40,8 +40,8 @@ defmodule CandyMartWeb.Admin.OrderController do
   end
 
   def create(conn, %{"order" => order_params}) do
-    case Orders.create_order(order_params) do
-      {:ok, order} ->
+    case Orders.create_customer_order(order_params) do
+      {:ok, %{order: order}} ->
         conn
         |> put_flash(:info, "Order created successfully.")
         |> redirect(to: Routes.admin_order_path(conn, :show, order))
