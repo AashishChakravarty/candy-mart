@@ -183,16 +183,7 @@ defmodule CandyMart.Orders do
 
   def create_customer_order(params) do
     Ecto.Multi.new()
-    |> Ecto.Multi.run(:customer, fn _repo, _ ->
-      customer_id = params["customer_id"]
-
-      with %Customer{} = customer <- get_customer(customer_id) do
-        {:ok, customer}
-      else
-        _ ->
-          create_customer(%{id: params["customer_id"], name: generate_string()})
-      end
-    end)
+    |> get_customer_multi(params)
     |> Ecto.Multi.run(:order, fn _repo, %{customer: _customer} ->
       create_order(params)
     end)
@@ -203,7 +194,7 @@ defmodule CandyMart.Orders do
     data
     |> Enum.map(&add_order/1)
     |> Enum.reduce_while({:ok, []}, fn
-      {:ok, result}, {_status, acc} ->
+      {:ok, %{order: result}}, {_status, acc} ->
         {:cont, {:ok, acc ++ [result]}}
 
       _, {_status, acc} ->
@@ -216,7 +207,7 @@ defmodule CandyMart.Orders do
     |> Map.put("product_name", data["product"])
     |> Map.put("unit_cost", round(data["unit_cost"]))
     |> Map.put("total_cost", round(data["total_cost"]))
-    |> create_order()
+    |> create_customer_order()
   end
 
   def parse_csv(file_path) do
@@ -266,7 +257,16 @@ defmodule CandyMart.Orders do
 
   def create_multi_transaction(changeset) do
     Ecto.Multi.new()
+    |> get_customer_multi(changeset.changes)
     |> Ecto.Multi.insert(:orders, changeset)
+  end
+
+  def get_customer_multi(multi, data) do
+    multi
+    |> Ecto.Multi.run(:customer, fn _repo, _ ->
+      customer_id = data["customer_id"] || data.customer_id
+      get_or_create_customer(%{id: customer_id, name: generate_string()})
+    end)
   end
 
   def get_order_statistics(range \\ "month") do
@@ -359,6 +359,15 @@ defmodule CandyMart.Orders do
     %Customer{}
     |> Customer.changeset(attrs)
     |> Repo.insert()
+  end
+
+  def get_or_create_customer(attrs \\ %{}) do
+    %Customer{}
+    |> Customer.changeset(attrs)
+    |> Repo.insert(
+      on_conflict: :nothing,
+      conflict_target: :id
+    )
   end
 
   @doc """
