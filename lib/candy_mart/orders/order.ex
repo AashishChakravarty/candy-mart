@@ -4,15 +4,15 @@ defmodule CandyMart.Orders.Order do
 
   use Pow.Ecto.Schema
 
-  @all_fields ~w(
-    quantity
+  @required ~W(quantity
     unit_cost
     total_cost
     product_name
-    customer_id
-  )a
+    customer_id)a
 
-  @required_fields @all_fields
+  @optional ~W(inserted_at)a
+
+  @all_fields @required ++ @optional
 
   schema "orders" do
     field :quantity, :integer
@@ -27,7 +27,7 @@ defmodule CandyMart.Orders.Order do
   def changeset(%__MODULE__{} = account, attrs \\ %{}) do
     account
     |> cast(attrs, @all_fields)
-    |> validate_required(@required_fields)
+    |> validate_required(@required)
   end
 
   def new_changeset(attrs \\ %{}) do

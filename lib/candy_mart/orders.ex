@@ -251,7 +251,7 @@ defmodule CandyMart.Orders do
       "unit_cost",
       "total_cost",
       "quantity",
-      "purchased_at",
+      "inserted_at",
       "customer_id"
     ]
 
