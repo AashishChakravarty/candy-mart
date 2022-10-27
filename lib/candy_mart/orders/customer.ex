@@ -2,6 +2,11 @@ defmodule CandyMart.Orders.Customer do
   use Ecto.Schema
   import Ecto.Changeset
 
+  @required ~W(name)a
+  @optional ~W(id)a
+
+  @all_fields @required ++ @optional
+
   schema "customers" do
     field :name, :string
 
@@ -11,7 +16,7 @@ defmodule CandyMart.Orders.Customer do
   @doc false
   def changeset(customer, attrs) do
     customer
-    |> cast(attrs, [:name])
-    |> validate_required([:name])
+    |> cast(attrs, @all_fields)
+    |> validate_required(@required)
   end
 end

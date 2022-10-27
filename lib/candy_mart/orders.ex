@@ -190,7 +190,7 @@ defmodule CandyMart.Orders do
         {:ok, customer}
       else
         _ ->
-          create_customer(%{name: generate_string()})
+          create_customer(%{id: params["customer_id"], name: generate_string()})
       end
     end)
     |> Ecto.Multi.run(:order, fn _repo, %{customer: _customer} ->
