@@ -43,8 +43,6 @@ defmodule CandyMart.Orders do
           order |> Map.put(:customer_name, customer.name)
         end)
 
-      IO.inspect(entries)
-
       {:ok,
        %{
          orders: entries,
