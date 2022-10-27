@@ -250,6 +250,7 @@ defmodule CandyMart.Orders do
       header
       |> Stream.zip(row)
       |> Map.new()
+      |> Map.update("inserted_at", NaiveDateTime.utc_now(), &NaiveDateTime.from_iso8601!/1)
 
     %Order{}
     |> Order.changeset(attrs)
