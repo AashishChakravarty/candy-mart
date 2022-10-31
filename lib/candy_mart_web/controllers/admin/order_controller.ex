@@ -20,7 +20,12 @@ defmodule CandyMartWeb.Admin.OrderController do
 
   def new(conn, _params) do
     changeset = Orders.change_order(%Order{})
-    render(conn, "new.html", changeset: changeset)
+
+    customers =
+      Orders.list_customers()
+      |> Enum.map(fn customer -> [key: customer.name, value: customer.id] end)
+
+    render(conn, "new.html", changeset: changeset, customers: customers)
   end
 
   def create(conn, %{"orders" => orders_params}) do
@@ -59,7 +64,12 @@ defmodule CandyMartWeb.Admin.OrderController do
   def edit(conn, %{"id" => id}) do
     order = Orders.get_order!(id)
     changeset = Orders.change_order(order)
-    render(conn, "edit.html", order: order, changeset: changeset)
+
+    customers =
+      Orders.list_customers()
+      |> Enum.map(fn customer -> [key: customer.name, value: customer.id] end)
+
+    render(conn, "edit.html", order: order, changeset: changeset, customers: customers)
   end
 
   def update(conn, %{"id" => id, "order" => order_params}) do

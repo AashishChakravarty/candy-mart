@@ -33,7 +33,7 @@
 
     <div class="torch-form-group">
       <%= label f, :customer_id %>
-      <%= number_input f, :customer_id %>
+      <%= select f, :customer_id, @customers %>
       <%= error_tag f, :customer_id %>
     </div>
 
